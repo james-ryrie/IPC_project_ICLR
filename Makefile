@@ -5,16 +5,16 @@ LDFLAGS  :=
 LDLIBS   :=
 
 # Targets
-TARGETS := udp_client_active udp_client
+TARGETS := udp_ITL_client udp_simulator_client
 
 # Default goal
 all: $(TARGETS)
 
 # Link rules
-udp_client_active: udp_client_active.o udp_p2p.o
+udp_ITL_client: udp_ITL_client.o udp_p2p.o
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-udp_client: udp_client.o udp_p2p.o
+udp_simulator_client: udp_simulator_client.o udp_p2p.o
 	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 # Compile rule (generates.o and.d)

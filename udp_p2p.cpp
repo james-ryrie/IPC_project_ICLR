@@ -1,6 +1,5 @@
 #include "udp_p2p.hpp"
 #include <string.h>
-#include <stdio.h>
 
 int open_socket(int port) {
 
@@ -38,14 +37,3 @@ int establish_connection(int open_socket_fd, int client_port) {
 
         return 0;
 }
-void send_message(int open_socket_fd, const char * message) {
-        send(open_socket_fd, message, strlen(message), 0);
-}
-void await_message(int open_socket_fd) {
-        char recieve_buffer[1024];
-        /* This operation waits untill some information is recieved in the socket */
-        ssize_t message_length = recv(open_socket_fd, &recieve_buffer, sizeof(recieve_buffer), 0);
-        recieve_buffer[message_length] = 0;
-        printf("%s\n",recieve_buffer);
-}
-
