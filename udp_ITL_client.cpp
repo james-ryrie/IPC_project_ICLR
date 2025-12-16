@@ -12,10 +12,10 @@ void await_data_packet(int open_socket_fd) {
 }
 
 int main() {
-        int open_socket_fd = open_socket(9001);
+        int open_socket_fd = open_socket(10551);
         if(open_socket_fd < 0) return -1;
 
-        int suc = establish_connection(open_socket_fd, 9000);
+        int suc = establish_connection(open_socket_fd, 10550);
         if(suc < 0){
                 close(open_socket_fd);
                 return -1;
