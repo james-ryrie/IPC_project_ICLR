@@ -5,12 +5,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define MAGIC 983812
 #define VERSION 0x0010
 #define PORT 10550
 
-struct simulator_to_ITL_data_packet {
-        int magic_code;
+struct __attribute__((packed)) simulator_to_ITL_data_packet {
         uint16_t version;
         double timestamp;
         uint64_t frame;
@@ -24,15 +22,13 @@ struct simulator_to_ITL_data_packet {
         double temperatures[8];
         double battery;
 };
-struct ITL_to_simulator_data_packet {
-        int magic_code;
+
+struct __attribute__((packed)) ITL_to_simulator_data_packet {
         uint16_t version;
         double dt;
         uint64_t frame;
         double actuators[32];
 };
-
-
 
 int open_socket(int port);
 
