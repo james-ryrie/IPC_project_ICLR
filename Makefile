@@ -4,26 +4,38 @@ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -pedantic -MMD -MP
 LDFLAGS  :=
 LDLIBS   :=
 
+
+# Example: CXXFLAGS += -Iinclude
+# CXXFLAGS += -Iinclude
+
+# Sources
+COMMON_SRCS := udp_p2p.cpp
+SIM_SRCS    := udp_simulator_client.cpp $(COMMON_SRCS)
+
+# Derived objects and dependencies
+ITL_OBJS := $(ITL_SRCS:.cpp=.o)
+SIM_OBJS := $(SIM_SRCS:.cpp=.o)
+
+ITL_DEPS := $(ITL_OBJS:.o=.d)
+SIM_DEPS := $(SIM_OBJS:.o=.d)
+
 # Targets
-TARGETS := udp_ITL_client udp_simulator_client
+TARGETS := udp_simulator_client
 
 # Default goal
 all: $(TARGETS)
 
-# Link rules
-udp_ITL_client: udp_ITL_client.o udp_p2p.o
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+udp_simulator_client: $(SIM_OBJS)
+	$(CXX) $(LDFLAGS) -o $@ $^ $(LIBRNP_A) $(LDLIBS)
 
-udp_simulator_client: udp_simulator_client.o udp_p2p.o
-	$(CXX) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-
-# Compile rule (generates.o and.d)
+# Generic compile rule (works for subdirectories too; ensures output dir exists)
 %.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Clean
 clean:
-	rm -f $(TARGETS) *.o *.d
+	rm -f $(TARGETS) $(ITL_OBJS) $(SIM_OBJS) $(ITL_DEPS) $(SIM_DEPS)
 
-# Include auto-generated dependency files
--include $(patsubst %.o,%.d,$(wildcard *.o)).PHONY: all clean
+# Auto-generated dependencies
+-include $(ITL_DEPS) $(SIM_DEPS).PHONY: all clean

@@ -2,19 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void send_data_packet(int open_socket_fd) {
-        struct simulator_to_ITL_data_packet data_packet = {};
-        data_packet.version = VERSION;
-        printf("%x\n",data_packet.version);
-        send(open_socket_fd, &data_packet, sizeof(data_packet), 0);
+
+
+
+void send_data_packet(struct simOutPacket * simoutpacket, int open_socket_fd) {
+
+
+        send(open_socket_fd, simoutpacket, sizeof(*simoutpacket), 0);
 }
-void await_data_packet(int open_socket_fd) {
-        struct ITL_to_simulator_data_packet * recieve_buffer = (struct ITL_to_simulator_data_packet *) malloc (sizeof(struct ITL_to_simulator_data_packet));
+
+void await_data_packet(struct simInPacket * siminpacket, int open_socket_fd) {
         /* This operation waits untill some information is recieved in the socket */
-        recv(open_socket_fd, recieve_buffer, sizeof(*recieve_buffer), 0);
-        printf("%x\n",recieve_buffer->version);
+
+
+        printf("Awaiting response:\n");
+        recv(open_socket_fd, siminpacket, sizeof(*siminpacket), 0);
+        printf("%x\n",siminpacket->version);
         printf("above should be 0x0010\n");
-        free(recieve_buffer);
 }
 
 void await_debug_data_packet(int open_socket_fd) {
@@ -25,6 +29,7 @@ void await_debug_data_packet(int open_socket_fd) {
         printf("\n");
 }
         
+
 
 int main(){
         int open_socket_fd = open_socket(10550);
@@ -38,15 +43,24 @@ int main(){
 
         //await_data_packet(open_socket_fd);
         await_debug_data_packet(open_socket_fd);
-        printf("First packet recieved\n");
 
         //Sends a dummy response for test purposes
-        printf("Sending response!\n");
-        send_data_packet(open_socket_fd);
-        printf("Sent data packet to adapter\n");
+        simOutPacket * outbound_packet= new simOutPacket();
+        outbound_packet->version = VERSION;
+        send_data_packet(outbound_packet, open_socket_fd);
 
-        await_data_packet(open_socket_fd);
+        struct simInPacket * inbound_packet = (struct simInPacket *) calloc(1, sizeof(struct simInPacket));
+        await_data_packet(inbound_packet, open_socket_fd);
         printf("Second packet recieved\n");
+
+        while (1) {
+                printf("Awaiting data packet:\n");
+                await_data_packet(inbound_packet, open_socket_fd);
+                send_data_packet(outbound_packet, open_socket_fd);
+        }
+
+
+        free(inbound_packet);
         
         close(open_socket_fd);
 }
